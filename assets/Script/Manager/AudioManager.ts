@@ -1,3 +1,5 @@
+import { mXhr } from "./XHRManager";
+
 /**
  * @description web 音频播放
  */
@@ -5,28 +7,25 @@ class AudioManager {
 
     private _context: AudioContext;
     private _source: AudioBufferSourceNode;
-
-    constructor() {
-        this._context = new AudioContext();
-        this._source = this._context.createBufferSource();
-    }
     
     /**
      * 加载
-     * @param url 音频地址
+     * @param name 音乐名称
      * @returns ArrayBuffer
      */
-    public load(url: string): Promise<ArrayBuffer> {
+    public load(name: string): Promise<ArrayBuffer> {
         return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('get', url);
-            xhr.responseType = 'arraybuffer';
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    resolve(xhr.response);
+            const req: IXHRReq = {
+                url: AUDIO_DOMAIN + '/' + name,
+                method: 'get',
+                responseType: 'arraybuffer',
+                success: (data: ArrayBuffer) => {
+                    this._context = new AudioContext();
+                    this._source = this._context.createBufferSource();
+                    resolve(data);
                 }
             }
-            xhr.send();
+            mXhr.send(req);
         })
     }
 
@@ -88,3 +87,4 @@ class AudioManager {
     }
 }
 export const mAudio = new  AudioManager();
+const AUDIO_DOMAIN = 'http://172.16.11.229:7894'
